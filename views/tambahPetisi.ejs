@@ -4,11 +4,139 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tambah Petisi</title>
+    <script>
+        // Function to handle change event for provinsi
+        async function fetchKabupaten(provinsiId) {
+            const kabupatenSelect = document.getElementById("kabupatenSelect");
+            kabupatenSelect.innerHTML = '<option selected value="">Loading...</option>'; // Show loading message
+
+            try {
+                // Fetch kabupaten/kota data from the API
+                const response = await fetch(`/api/kabupaten?provinsiId=${provinsiId}`);
+                const kabupatenList = await response.json();
+
+                // Clear and populate kabupaten select dropdown
+                kabupatenSelect.innerHTML = '<option selected value="">Pilih Kabupaten/Kota</option>';
+                kabupatenList.forEach((kabupaten) => {
+                    const option = document.createElement("option");
+                    option.value = kabupaten.id;
+                    option.textContent = kabupaten.name;
+                    kabupatenSelect.appendChild(option);
+                });
+            } catch (error) {
+                console.error("Error fetching kabupaten data:", error);
+                kabupatenSelect.innerHTML = '<option selected value="">Error loading data</option>';
+            }
+        }
+    </script>
 </head>
 <body>
     <form action="" method="post">
-        <input type="text" name="namaPetisi" placeholder="Nama Petisi">
-        <input type="submit" name="submit">
+        <!-- Nama Petisi -->
+        <input type="text" name="namaPetisi" placeholder="Judul Petisi" required>
+        <textarea name="isiPetisi" placeholder="Isi Petisi" required></textarea>
+
+        <!-- Tingkatan Dropdown -->
+        <% const listTingkatan = ['Kelurahan', 'Kecamatan', 'Kabupaten / Kota', 'Provinsi', 'Nasional']; %>
+        <select name="kategoriTingkatan" required>
+            <option selected value="">Pilih Tingkatan</option>
+            <% for (const tingkatan of listTingkatan) { %>
+                <option value="<%= tingkatan %>"><%= tingkatan %></option>
+            <% } %>
+        </select>
+
+        <!-- Provinsi Dropdown -->
+        <select name="provinsi" id="provinsiSelect" onchange="fetchKabupaten(this.value)" required>
+            <option selected value="">Pilih Provinsi</option>
+            <% for (const prov of provinsi) { %>
+                <option value="<%= prov.id %>"><%= prov.name %></option>
+            <% } %>
+        </select>
+
+        <!-- Kabupaten/Kota Dropdown -->
+        <select name="kabupaten" id="kabupatenSelect" onchange="fetchKecamatan(this.value)" required>
+            <option selected value="">Pilih Kabupaten</option>
+        </select>
+
+        <select name="kecamatan" id="kecamatanSelect" onchange="fetchKelurahan(this.value)" required>
+            <option selected value="">Pilih Kecamatan</option>
+        </select>
+
+        <select name="kelurahan" id="kelurahanSelect" required>
+            <option selected value="">Pilih Kelurahan/Kota</option>
+        </select>
+
+        <!-- Nama Pengaju -->
+        <input type="text" name="namaPengaju" placeholder="Nama Pengaju" required>
+
+        <!-- Submit Button -->
+        <input type="submit" name="submit" value="Submit">
     </form>
+
+    <script>
+        function fetchKabupaten(provinsiId) {
+            const linkKabupaten = `/api/kabupaten?provinsiId=${provinsiId}`;
+            
+            fetch(linkKabupaten)
+            .then(response => response.json())
+            .then(data => {
+                const kabupatenSelect = document.getElementById("kabupatenSelect");
+                kabupatenSelect.innerHTML = '<option selected value="">Pilih Kabupaten/Kota</option>';
+                data.forEach(kabupaten => {
+                    const option = document.createElement("option");
+                    option.value = kabupaten.id;
+                    option.textContent = kabupaten.name;
+                    kabupatenSelect.appendChild(option);
+                });
+            })
+            .catch(error => {
+                console.error("Error fetching kabupaten data:", error);
+                kabupatenSelect.innerHTML = '<option selected value="">Error loading data</option>';
+            });
+        }
+
+        function fetchKecamatan(kabupatenId) {
+            const linkKecamatan = `/api/kecamatan?kabupatenId=${kabupatenId}`;
+            
+            fetch(linkKecamatan)
+            .then(response => response.json())
+            .then(data => {
+                const kecamatanSelect = document.getElementById("kecamatanSelect");
+                kecamatanSelect.innerHTML = '<option selected value="">Pilih Kecamatan</option>';
+                data.forEach(kecamatan => {
+                    const option = document.createElement("option");
+                    option.value = kecamatan.id;
+                    option.textContent = kecamatan.name;
+                    kecamatanSelect.appendChild(option);
+                });
+            })
+            .catch(error => {
+                console.error("Error fetching kecamatan data:", error);
+                kecamatanSelect.innerHTML = '<option selected value="">Error loading data</option>';
+            });
+        }
+
+        function fetchKelurahan(kecamatanId) {
+            const linkKelurahan = `/api/kelurahan?kecamatanId=${kecamatanId}`;
+            
+            fetch(linkKelurahan)
+            .then(response => response.json())
+            .then(data => {
+                const kelurahanSelect = document.getElementById("kelurahanSelect");
+                kelurahanSelect.innerHTML = '<option selected value="">Pilih Kelurahan/Kota</option>';
+                data.forEach(kelurahan => {
+                    const option = document.createElement("option");
+                    option.value = kelurahan.id;
+                    option.textContent = kelurahan.name;
+                    kelurahanSelect.appendChild(option);
+                });
+            })
+            .catch(error => {
+                console.error("Error fetching kelurahan data:", error);
+                kelurahanSelect.innerHTML = '<option selected value="">Error loading data</option>';
+            });
+        }
+
+    </script>
 </body>
 </html>
