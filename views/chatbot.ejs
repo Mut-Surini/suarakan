@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot</title>
+</head>
+<body>
+    <h1>Chat with Gemini</h1>
+    <div id="chat-container"></div>
+    <form id="chat-form">
+        <input type="text" id="prompt" placeholder="Type your message here..." required />
+        <button type="submit">Send</button>
+    </form>
+
+    <script>
+        document.getElementById('chat-form').addEventListener('submit', async function (e) {
+        e.preventDefault();
+
+        const promptInput = document.getElementById('prompt');
+        const prompt = promptInput.value;
+        const chatContainer = document.getElementById('chat-container');
+
+        // Display user's message
+        const userMessage = document.createElement('div');
+        userMessage.textContent = `You: ${prompt}`;
+        chatContainer.appendChild(userMessage);
+
+        try {
+            // Send the prompt to the backend API
+            const response = await fetch('http://localhost:3000/chatbot', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ prompt }),
+            });
+
+            console.log('Response from backend:', response);
+
+            if (!response.ok) {
+                throw new Error('Failed to fetch response');
+            }
+
+            const data = await response.json();
+
+            // Display the bot's response
+            const botMessage = document.createElement('div');
+            botMessage.textContent = `Bot: ${data.response}`;
+            chatContainer.appendChild(botMessage);
+        } catch (error) {
+            console.error('Error:', error);
+
+            // Display error message if the API request fails
+            const errorMessage = document.createElement('div');
+            errorMessage.textContent = `Error: Unable to get response`;
+            chatContainer.appendChild(errorMessage);
+        }
+
+        // Clear the input field after submission
+        promptInput.value = '';
+    });
+
+    </script>
+</body>
+</html>
